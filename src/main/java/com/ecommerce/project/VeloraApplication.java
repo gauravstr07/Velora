@@ -9,5 +9,4 @@ public class VeloraApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(VeloraApplication.class, args);
 	}
-
 }
