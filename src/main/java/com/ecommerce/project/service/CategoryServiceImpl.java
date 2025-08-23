@@ -2,6 +2,7 @@ package com.ecommerce.project.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,21 @@ public class CategoryServiceImpl implements CategoryService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resource Not Found"));
 		categories.remove(category);
 		return "Deleted Category With ID: " + categoryId;
+	}
+
+	@Override
+	public Category updateCategory(Category category, Long categoryId) {
+		Optional<Category> optionalCategory = categories.stream().filter(c -> c.getCategoryId().equals(categoryId))
+				.findFirst();
+
+		if (optionalCategory.isPresent()) {
+			Category existingCategory = optionalCategory.get();
+			existingCategory.setCategoryName(category.getCategoryName());
+			return existingCategory;
+		} else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category Not Found");
+		}
+
 	}
 
 }
