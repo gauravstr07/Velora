@@ -43,34 +43,80 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public ProductResponse getAllProducts() {
 		List<Product> products = productRepository.findAll();
-		List<ProductDTO> productDTOs = products.stream()
-				.map(product -> modelMapper.map(product, ProductDTO.class))
+		List<ProductDTO> productDTOs = products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
 				.collect(Collectors.toList());
-		
+
 		ProductResponse productResponse = new ProductResponse();
 		productResponse.setContent(productDTOs);
-		
+
 		return productResponse;
 	}
 
 	@Override
 	public ProductResponse searchByCategory(Long categoryId) {
-		
+
 		Category category = categoryRepository.findById(categoryId)
 				.orElseThrow(() -> new ResouceNotFoundException("Category", "categoryId", categoryId));
-		
+
 		List<Product> products = productRepository.findByCategoryOrderByPriceAsc(category);
-		List<ProductDTO> productDTOs = products.stream()
-				.map(product -> modelMapper.map(product, ProductDTO.class))
+		List<ProductDTO> productDTOs = products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
 				.collect(Collectors.toList());
-		
+
 		ProductResponse productResponse = new ProductResponse();
 		productResponse.setContent(productDTOs);
-		
+
 		return productResponse;
 	}
 
+	@Override
+	public ProductResponse searchProductByKeyword(String keyword) {
+
+		List<Product> products = productRepository.findByProductNameLikeIgnoreCase('%' + keyword + '%');
+		List<ProductDTO> productDTOs = products.stream().map(product -> modelMapper.map(product, ProductDTO.class))
+				.collect(Collectors.toList());
+
+		ProductResponse productResponse = new ProductResponse();
+		productResponse.setContent(productDTOs);
+
+		return productResponse;
+	}
+
+	@Override
+	public ProductDTO updateProduct(Long productId, Product product) {
+		
+		Product productFromDB = productRepository.findById(productId)
+				.orElseThrow(() -> new ResouceNotFoundException("Product", "productId", productId));
+		
+		productFromDB.setProductName(product.getProductName());
+		productFromDB.setDescription(product.getDescription());
+		productFromDB.setQuantity(product.getQuantity());
+		productFromDB.setPrice(product.getPrice());
+		productFromDB.setDiscount(product.getDiscount());
+		productFromDB.setSpecialPrice(product.getSpecialPrice());
+		
+		Product savedProduct = productRepository.save(productFromDB);
+		
+		
+		return modelMapper.map(savedProduct, ProductDTO.class);
+	}
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

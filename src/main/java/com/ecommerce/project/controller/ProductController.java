@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,5 +39,17 @@ public class ProductController {
 	public ResponseEntity<ProductResponse> getProductsByCategory(@PathVariable Long categoryId) {
 		ProductResponse productResponse = productService.searchByCategory(categoryId);
 		return new ResponseEntity<>(productResponse, HttpStatus.OK);
+	}
+
+	@GetMapping("/public/products/keyword/{keyword}")
+	public ResponseEntity<ProductResponse> getProductsByKeyword(@PathVariable String keyword) {
+		ProductResponse productResponse = productService.searchProductByKeyword(keyword);
+		return new ResponseEntity<>(productResponse, HttpStatus.FOUND);
+	}
+
+	@PutMapping("/admin/products/{productId}")
+	public ResponseEntity<ProductDTO> updateProduct(@RequestBody Product product, @PathVariable Long productId) {
+		ProductDTO updatedProductDTO = productService.updateProduct(productId, product);
+		return new ResponseEntity<>(updatedProductDTO, HttpStatus.OK);
 	}
 }
