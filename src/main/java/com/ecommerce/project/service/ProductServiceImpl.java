@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.config.ConfigDataResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ecommerce.project.exceptions.ResouceNotFoundException;
@@ -29,9 +28,12 @@ public class ProductServiceImpl implements ProductService {
 	ModelMapper modelMapper;
 
 	@Override
-	public ProductDTO addProduct(Long categoryId, Product product) {
+	public ProductDTO addProduct(Long categoryId, ProductDTO productDTO) {
 		Category category = categoryRepository.findById(categoryId)
 				.orElseThrow(() -> new ResouceNotFoundException("Category", "categoryId", categoryId));
+
+		Product product = modelMapper.map(productDTO, Product.class);
+
 		product.setImage("default.png");
 		product.setCategory(category);
 		double specialPrice = product.getPrice() - ((product.getDiscount() * 0.01) * product.getPrice());
@@ -82,43 +84,32 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public ProductDTO updateProduct(Long productId, Product product) {
-		
+	public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
+
 		Product productFromDB = productRepository.findById(productId)
 				.orElseThrow(() -> new ResouceNotFoundException("Product", "productId", productId));
-		
+
+		Product product = modelMapper.map(productDTO, Product.class);
+
 		productFromDB.setProductName(product.getProductName());
 		productFromDB.setDescription(product.getDescription());
 		productFromDB.setQuantity(product.getQuantity());
 		productFromDB.setPrice(product.getPrice());
 		productFromDB.setDiscount(product.getDiscount());
 		productFromDB.setSpecialPrice(product.getSpecialPrice());
-		
+
 		Product savedProduct = productRepository.save(productFromDB);
-		
-		
+
 		return modelMapper.map(savedProduct, ProductDTO.class);
 	}
 
+	@Override
+	public ProductDTO deleteProduct(Long productId) {
+		Product product = productRepository.findById(productId)
+				.orElseThrow(() -> new ResouceNotFoundException("Product", "productId", productId));
+
+		productRepository.delete(product);
+		return modelMapper.map(product, ProductDTO.class);
+	}
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
