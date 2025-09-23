@@ -1,11 +1,17 @@
 package com.ecommerce.project.service;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ecommerce.project.exceptions.ResouceNotFoundException;
 import com.ecommerce.project.model.Category;
@@ -110,6 +116,42 @@ public class ProductServiceImpl implements ProductService {
 
 		productRepository.delete(product);
 		return modelMapper.map(product, ProductDTO.class);
+	}
+
+	@Override
+	public ProductDTO updateProductImage(Long productId, MultipartFile file) throws IOException {
+
+		Product productFromDB = productRepository.findById(productId)
+				.orElseThrow(() -> new ResouceNotFoundException("Product", "productId", productId));
+
+		String path = "/images";
+
+		String fileName = uploadImage(path, file);
+
+		productFromDB.setImage(fileName);
+
+		Product updatedProduct = productRepository.save(productFromDB);
+		return modelMapper.map(updatedProduct, ProductDTO.class);
+	}
+
+	private String uploadImage(String path, MultipartFile file) throws IOException {
+
+		String originalFileName = file.getOriginalFilename();
+
+		String randomId = UUID.randomUUID().toString();
+
+		String fileName = randomId.concat(originalFileName.substring(originalFileName.lastIndexOf('.')));
+
+		String filePath = path + File.separator + fileName;
+
+		File folder = new File(path);
+		if (!folder.exists()) {
+			folder.mkdir();
+		}
+
+		Files.copy(file.getInputStream(), Paths.get(filePath));
+
+		return fileName;
 	}
 
 }
